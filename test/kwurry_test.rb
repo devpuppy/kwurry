@@ -9,23 +9,21 @@ class KwurryTest < Minitest::Test
     @f ||= lambda { |a:, b:, c: nil, **xs| {a: a, b: b, c: c}.merge(xs) }
   end
 
-
   def test_that_lambda_has_kwurry
     assert f.respond_to?(:kwurry)
   end
 
   def test_that_kwurry_returns_new_lambda
     g = f.kwurry
-    assert g.is_a?(Proc), 'is not Proc'
+    assert_instance_of Proc, g
     assert g.lambda?, 'is not lambda'
-    refute_equal f, g, 'is self'
+    refute_same f, g
   end
 
   def test_that_partial_application_returns_lambda
     g = f.kwurry.(a: 1)
     assert_instance_of Proc, g
     assert g.lambda?, 'is not lambda'
-    refute_equal f, g
   end
 
   def test_that_full_application_returns_result
@@ -37,20 +35,17 @@ class KwurryTest < Minitest::Test
     g = f.kwurry.(a: 1).(c: 3)
     assert_instance_of Proc, g
     assert g.lambda?, 'is not lambda'
-    refute_equal f, g
   end
 
   def test_that_full_application_returns_result_eventually
     result = f.(a: 1, b: 2, c: 3)
-    g = f.kwurry.(a: 1).(c: 3).(b: 2)
-    assert_equal result, g
+    assert_equal result, f.kwurry.(a: 1).(c: 3).(b: 2)
   end
 
   def test_that_partial_application_continues_indefinitely
     g = f.kwurry.(a: 1).(x: -1).(y: -2).(z: -3)
     assert_instance_of Proc, g
     assert g.lambda?, 'is not lambda'
-    refute_equal f, g
   end
 
   def test_that_catches_invalid_keys_immediately
