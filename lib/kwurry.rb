@@ -11,7 +11,7 @@ module Kwurry
       apply = ->(keys) {
         if !keyrest
           invalid_keys = (keys - (keyreqs + keyopts))
-          raise ArgumentError.new("invalid keys: #{invalid_keys}") if invalid_keys.any?
+          raise ArgumentError.new("unknown keyword: #{invalid_keys}") if invalid_keys.any?
         end
         (keyreqs - keys).empty?
       }
