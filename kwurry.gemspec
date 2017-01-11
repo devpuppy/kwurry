@@ -7,10 +7,8 @@ Gem::Specification.new do |spec|
   spec.name          = "kwurry"
   spec.version       = Kwurry::VERSION
   spec.authors       = ["Justin Jones"]
-  # spec.email         = ["justin@example.com"]
 
   spec.summary       = %q{curry kwargs with Proc#kwurry}
-  spec.description   = %q{TODO: Write a longer description or delete this line.}
   spec.homepage      = "https://github.com/devpuppy/kwurry"
   spec.license       = "MIT"
 
