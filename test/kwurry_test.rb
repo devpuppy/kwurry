@@ -1,6 +1,9 @@
 require 'test_helper'
 
 class KwurryTest < Minitest::Test
+
+  using Kwurry
+
   def test_that_it_has_a_version_number
     refute_nil ::Kwurry::VERSION
   end
@@ -10,7 +13,10 @@ class KwurryTest < Minitest::Test
   end
 
   def test_that_lambda_has_kwurry
-    assert f.respond_to?(:kwurry)
+    # assert_respond_to f, :kwurry # respond_to? not compatible with refinements
+    f.kwurry
+  rescue NoMethodError => e
+    flunk e
   end
 
   def test_that_kwurry_returns_new_lambda
