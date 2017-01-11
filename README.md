@@ -20,7 +20,26 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+require 'kwurry/proc'
+```
+
+Or, to use it more cautiously as a refinement:
+
+```ruby
+class MyClass
+  using Kwurry
+  ...
+end
+```
+
+Now let's curry a kwargs lambda with `kwurry`:
+
+```ruby
+mult = ->(multiplier:, multiplicand:) { multiplier * multiplicand }
+mult_100 = mult.kwurry.(multiplicand: 100)
+mult_100.(multiplier: 5)
+```
 
 ## Development
 
