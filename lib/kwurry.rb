@@ -36,7 +36,7 @@ module Kwurry
     # keyreqs, keyopts, keyrest
     # as well as self (original lambda) to eventually invoke it
 
-    # inovke factory (with no args) to curry the lambda initially
+    # invoke factory (with no args) to curry the lambda initially
     # return the curried lambda it returns
     factory.()
   end
