@@ -98,4 +98,77 @@ class KwurryTest < Minitest::Test
     fn = ->(a:) { a }
     assert_raises(ArgumentError) { fn.kwurry.({a: 1}) }
   end
+
+  # Mixed positional and keyword currying: contract tests before implementation.
+  def test_mixed_keywords_can_arrive_before_positional_arguments
+    fn = ->(name, greeting:) { "#{greeting}, #{name}" }
+    assert_equal "Hello, Ruby", fn.kwurry.(greeting: "Hello").("Ruby")
+  end
+
+  def test_mixed_positional_arguments_can_arrive_before_keywords
+    fn = ->(name, greeting:) { "#{greeting}, #{name}" }
+    assert_equal "Hello, Ruby", fn.kwurry.("Ruby").(greeting: "Hello")
+  end
+
+  def test_multiple_positional_arguments_accumulate_in_order
+    fn = ->(a, b, c:) { [a, b, c] }
+    assert_equal [1, 2, 3], fn.kwurry.(1).(c: 3).(2)
+  end
+
+  def test_optional_positional_default_applies_once_required_arguments_arrive
+    fn = ->(a, b = 10, c:) { [a, b, c] }
+    assert_equal [1, 10, 3], fn.kwurry.(c: 3).(1)
+  end
+
+  def test_optional_positional_argument_can_be_provided_before_completion
+    fn = ->(a, b = 10, c:) { [a, b, c] }
+    assert_equal [1, 2, 3], fn.kwurry.(1, 2).(c: 3)
+  end
+
+  def test_positional_rest_arguments_can_accumulate_while_keywords_pending
+    fn = ->(a, *rest, c:) { [a, rest, c] }
+    assert_equal [1, [2, 3], 4], fn.kwurry.(1, 2).(3).(c: 4)
+  end
+
+  def test_excess_positional_arguments_raise_before_required_keywords_arrive
+    fn = ->(a, c:) { [a, c] }
+    assert_raises(ArgumentError) { fn.kwurry.(1, 2) }
+  end
+
+  def test_unknown_keyword_is_rejected_while_positional_argument_pending
+    fn = ->(a, c:) { [a, c] }
+    assert_raises(ArgumentError) { fn.kwurry.(unknown: 3) }
+  end
+
+  def test_mixed_arguments_in_same_application
+    fn = ->(a, b, c:) { [a, b, c] }
+    assert_equal [1, 2, 3], fn.kwurry.(1, c: 3).(2)
+  end
+
+  def test_positional_only_lambda_curries_until_required_arguments_arrive
+    fn = ->(a, b) { a + b }
+    assert_equal 3, fn.kwurry.(1).(2)
+  end
+
+  def test_ordinary_proc_waits_for_declared_positional_arguments
+    fn = proc { |a, b| [a, b] }
+    partial = fn.kwurry.(1)
+    assert_instance_of Proc, partial
+    assert_equal [1, 2], partial.(2)
+  end
+
+  def test_ordinary_proc_with_optional_default_uses_minimum_arity
+    fn = proc { |a, b = 10| [a, b] }
+    assert_equal [1, 10], fn.kwurry.(1)
+  end
+
+  def test_ordinary_proc_with_required_keyword_counts_positional_arity_separately
+    fn = proc { |a, b, c:| [a, b, c] }
+    assert_equal [1, 2, 3], fn.kwurry.(c: 3).(1).(2)
+  end
+
+  def test_ordinary_proc_with_rest_and_required_keyword
+    fn = proc { |a, *rest, c:| [a, rest, c] }
+    assert_equal [1, [2], 3], fn.kwurry.(1, 2).(c: 3)
+  end
 end
