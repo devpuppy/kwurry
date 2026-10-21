@@ -2,10 +2,17 @@ require "kwurry/version"
 
 module Kwurry
   def kwurry
-    # index keyword names by keyword type
+    # index parameter names by type
     ki = parameters.reduce(Hash.new { |h, k| h[k] = [] }) { |h, (type, name)| h[type] << name; h }
-    required_positionals = ki[:req].length
-    maximum_positionals = ki[:rest].any? ? nil : required_positionals + ki[:opt].length
+    # Non-lambda Proc#parameters marks positional arguments as optional, even
+    # when they have no defaults. Proc#arity captures the minimum instead.
+    required_positionals = if lambda?
+      ki[:req].length
+    else
+      positional_arity = arity >= 0 ? arity : -arity - 1
+      [positional_arity - ki[:keyreq].length, 0].max
+    end
+    maximum_positionals = ki[:rest].any? ? nil : ki[:req].length + ki[:opt].length
     keyreqs = ki[:keyreq]
     keyopts = ki[:key]
     keyrest = ki[:keyrest].any?
@@ -26,7 +33,7 @@ module Kwurry
     }
 
     # accepts any previously passed positional and keyword arguments
-    # returns a lambda that accepts any kwargs which ...
+    # returns a lambda that accepts positional and keyword arguments which ...
     # * returns result of original lambda if should apply
     # * otherwise invokes factory to return partially-applied curried lambda
     factory = ->(*applied_args, **applied_kwargs) {
