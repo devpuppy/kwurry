@@ -1,0 +1,17 @@
+name: Ruby 2.0 compatibility
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  legacy-ruby:
+    runs-on: ubuntu-24.04
+    container:
+      image: ruby:2.0
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Ruby 2.0-compatible test dependencies
+        run: gem install minitest -v 5.11.3 --no-document
+      - name: Run tests on Ruby 2.0
+        run: ruby -Ilib -Itest -e 'Dir["test/**/*_test.rb"].sort.each { |file| require File.expand_path(file) }'
