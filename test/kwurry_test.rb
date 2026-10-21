@@ -149,4 +149,26 @@ class KwurryTest < Minitest::Test
     fn = ->(a, b) { a + b }
     assert_equal 3, fn.kwurry.(1).(2)
   end
+
+  def test_ordinary_proc_waits_for_declared_positional_arguments
+    fn = proc { |a, b| [a, b] }
+    partial = fn.kwurry.(1)
+    assert_instance_of Proc, partial
+    assert_equal [1, 2], partial.(2)
+  end
+
+  def test_ordinary_proc_with_optional_default_uses_minimum_arity
+    fn = proc { |a, b = 10| [a, b] }
+    assert_equal [1, 10], fn.kwurry.(1)
+  end
+
+  def test_ordinary_proc_with_required_keyword_counts_positional_arity_separately
+    fn = proc { |a, b, c:| [a, b, c] }
+    assert_equal [1, 2, 3], fn.kwurry.(c: 3).(1).(2)
+  end
+
+  def test_ordinary_proc_with_rest_and_required_keyword
+    fn = proc { |a, *rest, c:| [a, rest, c] }
+    assert_equal [1, [2], 3], fn.kwurry.(1, 2).(c: 3)
+  end
 end
